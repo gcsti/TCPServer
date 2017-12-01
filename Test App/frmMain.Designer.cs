@@ -842,7 +842,7 @@
             this.btnChangePort4.Name = "btnChangePort4";
             this.btnChangePort4.Size = new System.Drawing.Size(74, 23);
             this.btnChangePort4.TabIndex = 71;
-            this.btnChangePort4.Text = "Change";
+            this.btnChangePort4.Text = "Change4";
             this.btnChangePort4.UseVisualStyleBackColor = true;
             this.btnChangePort4.Click += new System.EventHandler(this.btnChangePort4_Click);
             // 

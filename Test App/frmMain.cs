@@ -22,6 +22,7 @@ using System.Windows.Forms;
 
 namespace testerApp
 {
+
     public partial class frmMain : Form
     {
         public delegate void invokeDelegate();
@@ -85,6 +86,7 @@ namespace testerApp
             try
             {
                 openTcpPort(tcpServer4, txtPort4);
+                timer();
             }
             catch (FormatException)
             {
@@ -163,6 +165,15 @@ namespace testerApp
         private void btnSend_Click(object sender, EventArgs e)
         {
             send();
+        }
+        private void timer()
+        {
+            Timer time = new Timer();
+            time.Enabled = true;
+            time.Interval = 3000;
+            time.Start();
+            time.Tick += new System.EventHandler(this.btnSend_Click);
+
         }
 
         private void send()
