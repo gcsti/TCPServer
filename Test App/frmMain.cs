@@ -170,7 +170,7 @@ namespace testerApp
         {
             Timer time = new Timer();
             time.Enabled = true;
-            time.Interval = 3000;
+            time.Interval = 5000;
             time.Start();
             time.Tick += new System.EventHandler(this.btnSend_Click);
 
