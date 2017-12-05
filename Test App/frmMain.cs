@@ -14,11 +14,14 @@
  ****************************************************************/
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
+using testApp;
 
 namespace testerApp
 {
@@ -26,7 +29,8 @@ namespace testerApp
     public partial class frmMain : Form
     {
         public delegate void invokeDelegate();
-
+        System.Windows.Forms.Timer time = new System.Windows.Forms.Timer();
+        List<DataSender> lista = new List<DataSender>();
         public frmMain()
         {
             InitializeComponent();
@@ -86,7 +90,7 @@ namespace testerApp
             try
             {
                 openTcpPort(tcpServer4, txtPort4);
-                timer();
+               
             }
             catch (FormatException)
             {
@@ -164,19 +168,31 @@ namespace testerApp
 
         private void btnSend_Click(object sender, EventArgs e)
         {
-            send();
+            loadList();
+            Thread.Sleep(5000);
+            timer();
+        }
+
+        private void btnSend2_Click(object sender, EventArgs e)
+        {
+            if (lista.Count > 0)
+            {
+                send(lista[0]);
+                lista.Remove(lista[0]);
+            }
         }
         private void timer()
         {
-            Timer time = new Timer();
+           
             time.Enabled = true;
-            time.Interval = 5000;
+            time.Interval = int.Parse(txtLog.Text);
             time.Start();
-            time.Tick += new System.EventHandler(this.btnSend_Click);
+            time.Tick += new System.EventHandler(this.btnSend2_Click);
 
         }
+       
 
-        private void send()
+        private void loadList()
         {
             string data = "";
             string data1 = "";
@@ -190,9 +206,9 @@ namespace testerApp
                 }
                 data = data.Substring(0, data.Length - 2);
 
-                tcpServer1.Send(data);
+               // tcpServer1.Send(data);
 
-                logData(true, data);
+                //logData(true, data);
             }
 
             if (txtText2.Text.Length > 0)
@@ -202,8 +218,8 @@ namespace testerApp
                     data1 = data1 + line.Replace("\r", "").Replace("\n", "") + "\r\n";
                 }
                 data1 = data1.Substring(0, data1.Length - 2);
-                tcpServer2.Send(data1);
-                logData(true, data1);
+                //tcpServer2.Send(data1);
+                //logData(true, data1);
             }
 
             if (txtText3.Text.Length > 0)
@@ -214,19 +230,51 @@ namespace testerApp
                 }
                 data2 = data2.Substring(0, data2.Length - 2);
 
-                tcpServer3.Send(data2);
-                logData(true, data2);
+                //tcpServer3.Send(data2);
+               // logData(true, data2);
             }
 
-           
+
+            Random rnd = new Random();
+
+            for (int i = 0; i < 3600; i++)
+            {
+                
+                int Value = rnd.Next(1, 9);
+
+               
+
+               
+                DataSender a = new DataSender();
+                a.Balanca = StringExtensions.ReplaceAt(data, 11, 1, Value.ToString());
+                a.Dimensionador = StringExtensions.ReplaceAt(data1, 11, 1, Value.ToString());
+                a.Scanner = StringExtensions.ReplaceAt(data2, 16, 1, Value.ToString());
+                lista.Add(a);
+               
+            }
 
          
             
         }
 
+        public void send(DataSender item)
+        {
+
+          
+                tcpServer1.Send(item.Balanca);
+                logData(true, item.Balanca);
+                tcpServer2.Send(item.Dimensionador);
+                logData(true, item.Dimensionador);
+                tcpServer3.Send(item.Scanner);
+                logData(true, item.Scanner);
+            
+
+
+        }
+
         public void logData(bool sent, string text)
         {
-            txtLog.Text += "\r\n" + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss tt") + (sent ? " SENT:\r\n" : " RECEIVED:\r\n");
+            txtLog.Text += "\r\n" + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss:fff tt") + (sent ? " SENT:\r\n" : " RECEIVED:\r\n");
             txtLog.Text += text;
             txtLog.Text += "\r\n";
             if (txtLog.Lines.Length > 500)
@@ -241,7 +289,14 @@ namespace testerApp
 
         private void btnClose_Click(object sender, EventArgs e)
         {
-            Close();
+            //Close();
+            time.Stop();
+            time.Enabled = false;
+            tcpServer1.Close();
+            tcpServer2.Close();
+            tcpServer3.Close();
+            tcpServer4.Close();
+
         }
 
         private void frmMain_FormClosed(object sender, FormClosedEventArgs e)
